@@ -39,19 +39,25 @@ let recycleAudio = function (audio) {
     if (!audio._shouldRecycleOnEnded) {
         return;
     }
-    audio._finishCallback = null;
-    audio.off('ended');
-    audio.off('stop');
-    audio.src = null;
-    // In case repeatly recycle audio
-    if (!_audioPool.includes(audio)) {
-        if (_audioPool.length < 32) {
-            _audioPool.push(audio);
-        }
-        else {
-            audio.destroy();
+    // Some browser does not support recycle usage of audio
+    if (!!window.DISABLE_RECYCLE_AUDIO) {
+        audio.destroy();
+    } else{
+        audio._finishCallback = null;
+        audio.off('ended');
+        audio.off('stop');
+        audio.src = null;
+        // In case repeatly recycle audio
+        if (!_audioPool.includes(audio)) {
+            if (_audioPool.length < 32) {
+                _audioPool.push(audio);
+            }
+            else {
+                audio.destroy();
+            }
         }
     }
+
     audio._shouldRecycleOnEnded = false;
 };
 
